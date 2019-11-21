@@ -1,0 +1,60 @@
+close all; clear; clc
+
+tmax = 2.0; %時間長区間
+ts = 0.001; %時間刻み幅(サンプリング間隔)
+fs = 1/ts; %サンプリング周波数
+t = 0:ts:tmax-ts; %時間軸ベクトル
+
+% 搬送波
+fr = 50; %搬送波周波数
+cw = sin(2*pi*fr*t); %搬送波
+
+%送信パルス列の生成
+fp = 10; %送信パル列の周波数[Hz]
+BT = 1/fp; %送信パルスの周期
+SL = BT/ts; %1パルスのサンプル数
+Nb = tmax/BT; %送信ビット数
+sd = 5; rng(sd); %乱数生成の初期値
+Sb = randi([0, 1], 1, Nb); %送信ビット列生成
+spls = repelem(Sb, SL); % ビットパルス列信号
+
+%一次変調波の生成
+A0 = -1.0; %ビット0→振幅-1.0(ビット0)
+A1 = 1.0; %ビット1→振幅1.0(ビット1)
+Damp = zeros(1, Nb); %一次変調(パルス振幅変調)配列の初期化
+for c = 1:Nb
+    if Sb(1, c) == 0
+        Damp(1, c) = A0; %ビット0のときPSKの0[rad]
+    else
+        Damp(1, c) = A1;%ビット1のときPSKの0[rad]
+    end
+end
+
+mpls = repelem(Damp, SL); %振幅変調値の送信パルス列信号
+
+%PSK変調
+PSK = cw.*mpls;
+
+%SS変調
+alpha = 20; %拡散比 ビット列パルス周波数のalpha倍
+Nbs = Nb * alpha; %拡散信号のビット数(alpha倍)
+SLs = SL/alpha; %拡散信号1パルスのサンプル数
+
+rng(8); %乱数の初期値シード
+MX = 2*randi([0, 1], 1, Nbs)-1; %拡散変調用-1, +1の乱数生成
+sspls = repelem(MX, SLs); %拡散変調用乱数パルス列
+
+SS = sspls.*PSK; %変調波(拡散信号と送信パルス列の乗算)
+
+figure(1)
+subplot(311)
+plot(t, spls); %送信ビットパルス列信号
+axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+subplot(312)
+plot(t, PSK); %1次変長パルス列信号
+axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+subplot(313)
+plot(t, SS); %2次変調波高速パルス信号
+axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+saveas(gcf,'../result_image/figure1.png')
+

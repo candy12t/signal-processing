@@ -1,4 +1,5 @@
 close all; clear; clc
+
 tmax = 2.0; % 時間長区間
 ts = 0.001; % 時間刻み幅(サンプリング間隔)
 fs = 1/ts; % サンプリング周波数
@@ -34,8 +35,15 @@ F_ASK = fft(ASK);
 N = length(ASK); % 変調波の信号長(サンプル数)
 nf = 0:fs/(N-1):fs; % 周波数軸ベクトル生成
 
+frn = 60;
+[nis, Fs] = audioread('../../audio/white_Noise.wav');
+wn = nis';
+wnoise = wn(1:length(cw));
+nnoise = cos(2*pi*frn*t);
+ASKn = ASK + 1.5*wnoise + 0.2*nnoise;
+
 % 受信側 %
-AbASK = abs(ASK); % ASK変調波の絶対値
+AbASK = abs(ASKn); % ASK変調波の絶対値
 
 % 周波数領域LPF %
 FT_AbASK = fft(AbASK); % FFT
@@ -62,26 +70,17 @@ disp(['BER=', num2str(BER), '% [誤りbit数/送信bit数]'])
 
 figure(1)
 subplot(311)
-plot(t, cw);
+plot(t, cw); % 搬送波
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(312)
 plot(t, spls);
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(313)
-plot(t, ASK);
+plot(t, ASK); % ASK変調波
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+% saveas(gcf,'../result_image/figure1.png')
 
 figure(2)
-subplot(211)
-plot(nf, F_ASK.*conj(F_ASK)./N./N);
-xlabel('Frequency [Hz]'); ylabel('Amplitude spectrum');
-xlim([0, fs/2]); ylim([0, 0.005]);
-subplot(212)
-plot(nf, Env_AbASK.*conj(Env_AbASK)./N./N);
-xlabel('Frequency [Hz]'); ylabel('Amplitude spectrum');
-xlim([0, fs/2]); ylim([0, 0.005]);
-
-figure(3)
 subplot(311)
 plot(t, rpls);
 axis([0, tmax, -0.0 1.0]); xlabel('Time [s]'); ylabel('Amplitude');
@@ -91,3 +90,5 @@ axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(313)
 plot(t, spls);
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+
+% saveas(gcf,'../result_image/figure2.png')
