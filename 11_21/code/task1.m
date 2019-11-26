@@ -45,22 +45,29 @@ sspls = repelem(MX, SLs); %拡散変調用乱数パルス列
 % SS変調
 SS = sspls.*PSK; %変調波(拡散信号と送信パルス列の乗算)
 
-spls0 = A0*cw;
-spls1 = A1*cw;
-COR0 = PSK.*spls0;
-COR1 = PSK.*spls1;
-SPSK0 = reshape(COR0, [SL, Nb]);
-SPSK1 = reshape(COR1, [SL, Nb]);
+% 受信側(相関検出)
+spls0 = A0*cw; % ビット0のときの変調波(基準)
+spls1 = A1*cw; % ビット1のときの変調波(基準)
+COR0 = PSK.*spls0; % 受信変調波とビット0変調波の乗算(相関)
+COR1 = PSK.*spls1; % 受信変調波とビット1変調波の乗算(相関)
+SPSK0 = reshape(COR0, [SL, Nb]); % ビット単位に相関の整列
+SPSK1 = reshape(COR1, [SL, Nb]); % ビット単位に相関の整列
 
-DC0 = zeros(1, Nb);
-DC1 = zeros(1, Nb);
-Rb = zeros(1, Nb);
+DC0 = zeros(1, Nb); % ビット0との相関値の配列の初期化
+DC1 = zeros(1, Nb); % ビット1との相関値の配列の初期化
+Rb = zeros(1, Nb); % 相関の強弱の判定の配列初期化
 for e=1:Nb
-    DC0(1, e) = sum(SPSK0(:,e))/SL;
-    DC1(1, e) = sum(SPSK1(:,e))/SL;
-    Rb(1, e) = DC1(1, e) >= DC0(1, e);
+    DC0(1, e) = sum(SPSK0(:,e))/SL; % ビット0との正規化相関値
+    DC1(1, e) = sum(SPSK1(:,e))/SL; % ビット1との正規化相関値
+    Rb(1, e) = DC1(1, e) >= DC0(1, e); % 相関値の判定
 end
-dpls = repelem(Rb, SL);
+dpls = repelem(Rb, SL); % 受信判定復元パルス列信号
+
+BER = (sum(xor(Sb, Rb))/Nb); %BER算出
+disp([num2str(Nb), 'bit送信']) % 送信ビット数表示
+disp(['送信bit列', num2str(Sb)]) % 送信ビット列表示
+disp(['受信bit列', num2str(Rb)]) % 受信ビット列表示
+disp(['BER=', num2str(BER), '% [誤りbit数/送信bit数]'])
 
 figure(1)
 subplot(311)
@@ -72,7 +79,7 @@ axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(313)
 plot(t, SS); %2次変調波高速パルス信号
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-% saveas(gcf,'../result_image/figure1.png')
+saveas(gcf,'../result_image/figure1.png')
 
 figure(2)
 subplot(211)
@@ -81,3 +88,4 @@ axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(212)
 plot(t, spls) % 送信ビット列信号
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
+saveas(gcf,'../result_image/figure2.png')
