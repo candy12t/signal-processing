@@ -45,8 +45,18 @@ sspls = repelem(MX, SLs); %拡散変調用乱数パルス列
 % SS変調
 SS = sspls.*PSK; %変調波(拡散信号と送信パルス列の乗算)
 
+% 外乱雑音
+frn = 60;
+[nis, Fs] = audioread('../../audio/white_Noise.wav'); % 白色雑音読み込み
+wn = nis'; % 白色雑音
+wnoise = wn(1:length(SS)); % 白色雑音
+nnoise = cos(2*pi*frn*t); % 狭帯域雑音
+
+% 伝送路雑音
+SSn = SS + 5*wnoise + 5*nnoise; % 観測信号
+
 % 逆拡散で復調
-aSS = SS.*PSK;
+aSS = SSn.*PSK;
 
 % 受信側(相関検出)
 spls0 = A0*cw; % ビット0のときの変調波(基準)
@@ -73,16 +83,19 @@ disp(['受信bit列', num2str(Rb)]) % 受信ビット列表示
 disp(['BER=', num2str(BER), '% [誤りbit数/送信bit数]'])
 
 figure(1)
-subplot(311)
+subplot(411)
 plot(t, spls); %送信ビットパルス列信号
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-subplot(312)
+subplot(412)
 plot(t, PSK); %1次変長パルス列信号
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-subplot(313)
+subplot(413)
 plot(t, SS); %2次変調波高速パルス信号
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-saveas(gcf,'../result_image/figure1.png')
+subplot(414)
+plot(t, SSn); %2次変調波高速パルス信号
+axis([0, tmax, -10 10]); xlabel('Time [s]'); ylabel('Amplitude');
+saveas(gcf,'../result_image/figure2_1.png')
 
 figure(2)
 subplot(211)
@@ -91,4 +104,4 @@ axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(212)
 plot(t, spls) % 送信ビット列信号
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-saveas(gcf,'../result_image/figure2.png')
+saveas(gcf,'../result_image/figure2_2.png')
