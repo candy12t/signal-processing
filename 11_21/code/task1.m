@@ -46,7 +46,7 @@ sspls = repelem(MX, SLs); %拡散変調用乱数パルス列
 SS = sspls.*PSK; %変調波(拡散信号と送信パルス列の乗算)
 
 % 逆拡散で復調
-aSS = SS.*PSK;
+aSS = SS.*sspls;
 
 % 受信側(相関検出)
 spls0 = A0*cw; % ビット0のときの変調波(基準)
@@ -82,7 +82,7 @@ axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(313)
 plot(t, SS); %2次変調波高速パルス信号
 axis([0, tmax, -1.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-saveas(gcf,'../result_image/figure1.png')
+saveas(gcf,'../result_image/figure1_1.png')
 
 figure(2)
 subplot(211)
@@ -91,4 +91,4 @@ axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
 subplot(212)
 plot(t, spls) % 送信ビット列信号
 axis([0, tmax, -0.5 1.5]); xlabel('Time [s]'); ylabel('Amplitude');
-saveas(gcf,'../result_image/figure2.png')
+saveas(gcf,'../result_image/figure1_2.png')

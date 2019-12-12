@@ -56,7 +56,7 @@ nnoise = cos(2*pi*frn*t); % 狭帯域雑音
 SSn = SS + 5*wnoise + 5*nnoise; % 観測信号
 
 % 逆拡散で復調
-aSS = SSn.*PSK;
+aSS = SSn.*sspls;
 
 % 受信側(相関検出)
 spls0 = A0*cw; % ビット0のときの変調波(基準)
