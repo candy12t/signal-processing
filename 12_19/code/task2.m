@@ -11,13 +11,7 @@ delta = fix(K/2);
 
 H = [-1,-1,-1; -1,8,-1; -1,-1,-1;];
 
-YF = YO;
-for i = 1+delta:C-delta
-    for j=1+delta:R-delta
-        S = double (YO(i-delta:i+delta,j-delta:j+delta));
-        YF(i,j) = sum(sum(H.*S));
-    end
-end
+YF = mask(YO, delta, C, R, H);
 
 figure(1)
 imshow(uint8(YO)); xlabel('Original image');
