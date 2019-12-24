@@ -28,9 +28,10 @@ end
 
 figure(1)
 imshow(uint8(YO)); xlabel('Original image'); % 元画像表示
+saveas(gcf,'figure(1).png')
 figure(2)
 imshow(uint8(YF)); xlabel('Filtered image'); % フィルタ処理画像表示
+saveas(gcf,'figure(2).png')
 figure(3)
 imshow(BY); xlabel('Binary image');
-
-
+saveas(gcf,'figure(3).png')
